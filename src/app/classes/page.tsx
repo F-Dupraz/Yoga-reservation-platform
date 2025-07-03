@@ -38,7 +38,10 @@ export default function ClassesPage() {
       setProfile(userProfile)
       
       // Cargar clases y reservas del usuario
-      await Promise.all([loadClasses(), loadUserReservations(currentUser.id)])
+      await Promise.all([
+        loadClasses(), 
+        loadUserReservations(currentUser.id)
+      ])
     } catch (error) {
       console.error('Error loading data:', error)
       router.push('/login')
@@ -49,30 +52,27 @@ export default function ClassesPage() {
 
   const loadClasses = async () => {
     try {
-      // Obtener todas las clases con información del profesor y contador de reservas
-      const { data, error } = await supabase
+      const { data: classesData, error: classesError } = await supabase
         .from('classes')
         .select(`
           *,
-          teacher:teacher_id(full_name),
-          reservations(count)
+          teacher:profiles!teacher_id (
+            id,
+            full_name,
+            role
+          )
         `)
         .order('day_of_week', { ascending: true })
         .order('start_time', { ascending: true })
 
-      if (error) throw error
-      
-      // Procesar datos para incluir el conteo actual de reservas
-      const classesWithCount = data.map(classItem => ({
-        ...classItem,
-        current_reservations: classItem.reservations.length,
-        available_spots: classItem.max_capacity - classItem.reservations.length,
-        teacher: classItem.teacher || {full_name: "Profesor no disponible" }
-      }))
-      
-      setClasses(classesWithCount)
+      if (classesError) throw classesError
+
+      console.log('Classes loaded:', classesData)
+      setClasses(classesData)
+
     } catch (error) {
       console.error('Error loading classes:', error)
+      setClasses([])
     }
   }
 
@@ -83,12 +83,19 @@ export default function ClassesPage() {
         .select('class_id')
         .eq('student_id', userId)
 
-      if (error) throw error
+      if (error) {
+        console.error('Error loading user reservations:', error)
+        setUserReservations([])
+        return
+      }
       
-      // Guardar array de IDs de clases reservadas para verificación rápida
-      setUserReservations(data.map(reservation => reservation.class_id))
+      // Extraer solo los IDs de las clases reservadas
+      const reservedClassIds = data.map(reservation => reservation.class_id)
+      console.log('User reservations loaded:', reservedClassIds) // Debug
+      setUserReservations(reservedClassIds)
     } catch (error) {
       console.error('Error loading user reservations:', error)
+      setUserReservations([])
     }
   }
 
@@ -102,6 +109,25 @@ export default function ClassesPage() {
     setReservationLoading(classId)
     
     try {
+      // Verificar si ya tiene reserva ANTES de intentar reservar
+      const { data: existingReservation, error: checkError } = await supabase
+        .from('reservations')
+        .select('id')
+        .eq('student_id', user.id)
+        .eq('class_id', classId)
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        // PGRST116 = no rows returned, que es lo que esperamos si no hay reserva
+        throw checkError
+      }
+
+      if (existingReservation) {
+        alert('Ya tienes una reserva para esta clase')
+        return
+      }
+
+      // Proceder con la reserva
       const { error } = await supabase
         .from('reservations')
         .insert([{
@@ -111,8 +137,12 @@ export default function ClassesPage() {
 
       if (error) throw error
 
-      // Actualizar estado local para reflejar la nueva reserva
-      setUserReservations(prev => [...prev, classId])
+      // Actualizar estado local
+      setUserReservations(prev => {
+        const newReservations = [...prev, classId]
+        console.log('Updated reservations after add:', newReservations) // Debug
+        return newReservations
+      })
       
       // Recargar clases para actualizar contador de disponibilidad
       await loadClasses()
@@ -130,6 +160,25 @@ export default function ClassesPage() {
     setReservationLoading(classId)
     
     try {
+      // Verificar que realmente tiene la reserva antes de cancelar
+      const { data: existingReservation, error: checkError } = await supabase
+        .from('reservations')
+        .select('id')
+        .eq('student_id', user.id)
+        .eq('class_id', classId)
+        .single()
+
+      if (checkError) {
+        if (checkError.code === 'PGRST116') {
+          alert('No tienes una reserva para esta clase')
+          // Actualizar estado local por si estaba desincronizado
+          setUserReservations(prev => prev.filter(id => id !== classId))
+          return
+        }
+        throw checkError
+      }
+
+      // Proceder con la cancelación
       const { error } = await supabase
         .from('reservations')
         .delete()
@@ -139,7 +188,11 @@ export default function ClassesPage() {
       if (error) throw error
 
       // Actualizar estado local
-      setUserReservations(prev => prev.filter(id => id !== classId))
+      setUserReservations(prev => {
+        const newReservations = prev.filter(id => id !== classId)
+        console.log('Updated reservations after cancel:', newReservations) // Debug
+        return newReservations
+      })
       
       // Recargar clases para actualizar contador
       await loadClasses()
@@ -258,10 +311,12 @@ export default function ClassesPage() {
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold text-gray-900">{classItem.title}</h3>
-                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        isFull ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                      }`}>
-                        {classItem.available_spots} cupos
+                      <div className="flex items-center space-x-2">
+                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          isFull ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                        }`}>
+                          {classItem.available_spots} cupos
+                        </div>
                       </div>
                     </div>
                     
@@ -278,7 +333,7 @@ export default function ClassesPage() {
                       </div>
                       <div className="flex items-center">
                         <span className="font-medium w-20">Profesor:</span>
-                        <span>{classItem.teacher?.full_name || ""}</span>
+                        <span>{classItem.teacher?.full_name || 'No disponible'}</span>
                       </div>
                       <div className="flex items-center">
                         <span className="font-medium w-20">Capacidad:</span>

@@ -55,25 +55,39 @@ export default function ManageClassesPage() {
   const loadClasses = async (teacherId) => {
     try {
       // Obtener clases del profesor actual con conteo de reservas
-      const { data, error } = await supabase
+      const { data: classesData, error: classesError } = await supabase
         .from('classes')
-        .select(`
-          *,
-          reservations(count)
-        `)
+        .select('*')
         .eq('teacher_id', teacherId)
         .order('day_of_week', { ascending: true })
         .order('start_time', { ascending: true })
 
-      if (error) throw error
-      
+      if (classesError) {
+        console.error('Error loading classes: ', classesError)
+        throw classesError
+      }
+
       // Procesar datos para incluir conteo de reservas
-      const classesWithCount = data.map(classItem => ({
-        ...classItem,
-        current_reservations: classItem.reservations.length
-      }))
-      
+      const classesWithCount = await Promise.all(
+        classesData.map(async (classItem) => {
+          const { count: reservationCount, error: countError } = await supabase
+            .from('reservations')
+            .select('*', {count: 'exact', head: true})
+            .eq('class_id', classItem.id)
+        
+          if(countError) {
+            console.log('Error counting reservations for classes: ', countError)
+          }
+
+          return {
+            ...classItem,
+            current_reservations: reservationCount || 0
+          }
+        })
+      )
+
       setClasses(classesWithCount)
+
     } catch (error) {
       console.error('Error loading classes:', error)
     }
