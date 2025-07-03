@@ -32,7 +32,7 @@ export default function ClassesPage() {
     try {
       // Cargar usuario actual y perfil
       const currentUser = await getCurrentUser()
-      const userProfile = await getUserProfile(currentUser.id)
+      const userProfile = await getUserProfile(currentUser?.id)
       
       setUser(currentUser)
       setProfile(userProfile)
@@ -168,7 +168,7 @@ export default function ClassesPage() {
         .eq('class_id', classId)
         .single()
 
-      if (checkError) {
+      if (checkError && !existingReservation) {
         if (checkError.code === 'PGRST116') {
           alert('No tienes una reserva para esta clase')
           // Actualizar estado local por si estaba desincronizado

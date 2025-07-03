@@ -6,7 +6,6 @@ import { getCurrentUser, getUserProfile, supabase } from '@/lib/supabase'
 
 export default function ManageClassesPage() {
   const [user, setUser] = useState(null)
-  const [profile, setProfile] = useState(null)
   const [classes, setClasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -41,7 +40,6 @@ export default function ManageClassesPage() {
       }
       
       setUser(currentUser)
-      setProfile(userProfile)
       
       await loadClasses(currentUser.id)
     } catch (error) {

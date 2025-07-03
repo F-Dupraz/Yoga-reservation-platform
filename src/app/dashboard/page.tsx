@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { getCurrentUser, getUserProfile, signOut, supabase } from '@/lib/supabase'
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -26,7 +25,6 @@ export default function Dashboard() {
       const currentUser = await getCurrentUser()
       const userProfile = await getUserProfile(currentUser.id)
       
-      setUser(currentUser)
       setProfile(userProfile)
       
       // Cargar estadísticas específicas según el rol
@@ -150,6 +148,32 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Tarjetas de estadísticas - ANTES de las acciones rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <dt className="text-sm font-medium text-gray-500">Total de Clases</dt>
+              <dd className="text-2xl font-semibold text-gray-900">{stats.totalClasses}</dd>
+            </div>
+          </div>
+  
+          {profile.role === 'teacher' ? (
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <dt className="text-sm font-medium text-gray-500">Mis Clases</dt>
+              <dd className="text-2xl font-semibold text-gray-900">{stats.myClasses}</dd>
+            </div>
+          </div>
+          ) : (
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <dt className="text-sm font-medium text-gray-500">Mis Reservas</dt>
+              <dd className="text-2xl font-semibold text-gray-900">{stats.myReservations}</dd>
+            </div>
+          </div>
+          )}
         </div>
 
         {/* Acciones rápidas según el rol */}
