@@ -427,8 +427,6 @@ export default function ManageClassesPage() {
                       <button
                         onClick={() => handleDelete(classItem.id)}
                         className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium"
-                        disabled={classItem.current_reservations > 0}
-                        title={classItem.current_reservations > 0 ? 'No se puede eliminar una clase con reservas activas' : ''}
                       >
                         Eliminar
                       </button>

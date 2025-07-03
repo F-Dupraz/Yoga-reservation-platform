@@ -1,113 +1,186 @@
 /* src/app/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* Estilos base personalizados */
-@layer base {
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-  
-  /* Mejoras de accesibilidad */
-  *:focus {
-    outline: 2px solid #4F46E5;
-    outline-offset: 2px;
-  }
-  
-  /* Estilos para botones disabled */
-  button:disabled {
-    cursor: not-allowed;
-  }
+html {
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-@layer components {
-  /* Componente de botón base reutilizable */
-  .btn-primary {
-    @apply bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
-  }
-  
-  .btn-secondary {
-    @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500;
-  }
-  
-  .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500;
-  }
-  
-  /* Componente de input base */
-  .input-base {
-    @apply block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200;
-  }
-  
-  /* Componente de card */
-  .card {
-    @apply bg-white shadow rounded-lg overflow-hidden;
-  }
-  
-  .card-header {
-    @apply px-6 py-4 border-b border-gray-200;
-  }
-  
-  .card-body {
-    @apply p-6;
-  }
-  
-  /* Loading spinner personalizado */
-  .spinner {
-    @apply animate-spin rounded-full border-b-2 border-indigo-600;
-  }
-  
-  /* Badge/Tag styles */
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
-  
-  .badge-blue {
-    @apply bg-blue-100 text-blue-800;
-  }
-  
-  .badge-green {
-    @apply bg-green-100 text-green-800;
-  }
-  
-  .badge-purple {
-    @apply bg-purple-100 text-purple-800;
-  }
-  
-  .badge-red {
-    @apply bg-red-100 text-red-800;
-  }
+/* Mejoras de accesibilidad */
+*:focus {
+  outline: 2px solid #4F46E5;
+  outline-offset: 2px;
 }
 
-@layer utilities {
-  /* Utilidades personalizadas */
-  .text-balance {
-    text-wrap: balance;
-  }
-  
-  /* Transiciones suaves */
-  .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  /* Gradientes personalizados */
-  .gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
-  
-  .gradient-secondary {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  }
-  
-  /* Sombras personalizadas */
-  .shadow-soft {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-  
-  /* Responsive utilities adicionales */
+/* Estilos para botones disabled */
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Componente de botón base reutilizable */
+.btn-primary {
+  background-color: #4f46e5;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+}
+
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #4f46e5, 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.btn-secondary {
+  background-color: #4b5563;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #374151;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+/* Componente de input base */
+.input-base {
+  display: block;
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  color: #111827;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-base:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px #4f46e5;
+}
+
+.input-base::placeholder {
+  color: #6b7280;
+}
+
+/* Componente de card */
+.card {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Loading spinner personalizado */
+.spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  border-bottom: 2px solid #4f46e5;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Badge/Tag styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-blue {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-green {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.badge-purple {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+}
+
+.badge-red {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* Utilidades personalizadas */
+.text-balance {
+  text-wrap: balance;
+}
+
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Gradientes personalizados */
+.gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* Sombras personalizadas */
+.shadow-soft {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Container personalizado */
+.container-custom {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
   .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    padding: 0 2rem;
   }
 }
 
@@ -142,42 +215,86 @@
 
 /* Estilos para formularios */
 .form-group {
-  @apply space-y-1;
+  margin-bottom: 1rem;
 }
 
 .form-label {
-  @apply block text-sm font-medium text-gray-700;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
 }
 
 .form-input {
-  @apply input-base;
+  /* Hereda estilos de .input-base */
 }
 
 .form-select {
-  @apply block w-full border border-gray-300 rounded-md px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500;
+  display: block;
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  background-color: white;
+  color: #111827;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px #4f46e5;
 }
 
 .form-textarea {
-  @apply block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 resize-vertical;
+  display: block;
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  color: #111827;
+  resize: vertical;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px #4f46e5;
+}
+
+.form-textarea::placeholder {
+  color: #6b7280;
 }
 
 /* Estilos para estados de error */
 .form-error {
-  @apply border-red-300 focus:ring-red-500 focus:border-red-500;
+  border-color: #f87171;
+}
+
+.form-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444;
 }
 
 .error-message {
-  @apply text-sm text-red-600 mt-1;
+  font-size: 0.875rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
 }
 
 /* Mejoras de UX */
 .loading-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
 }
 
 /* Dark mode support (para futuro) */
 @media (prefers-color-scheme: dark) {
-  /* Variables para modo oscuro si se implementa en el futuro */
   :root {
     --bg-primary: #1f2937;
     --bg-secondary: #374151;
