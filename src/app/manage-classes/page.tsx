@@ -3,20 +3,35 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentUser, getUserProfile, supabase } from '@/lib/supabase'
+import { User } from '@supabase/supabase-js'
+
+type ClassItem = {
+  id: string
+  title: string
+  description: string
+  day_of_week: number
+  start_time: string
+  end_time: string
+  max_capacity: number
+  current_reservations: number
+  teacher_id: string
+  created_at: string
+  updated_at: string
+}
 
 export default function ManageClassesPage() {
-  const [user, setUser] = useState(null)
-  const [classes, setClasses] = useState([])
+  const [user, setUser] = useState<User | null>(null)
+  const [classes, setClasses] = useState<ClassItem[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [editingClass, setEditingClass] = useState(null)
+  const [editingClass, setEditingClass] = useState<ClassItem | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     day_of_week: '',
     start_time: '',
     end_time: '',
-    max_capacity: 10
+    max_capacity: '10'
   })
   const [formLoading, setFormLoading] = useState(false)
   const router = useRouter()
@@ -30,6 +45,11 @@ export default function ManageClassesPage() {
   const loadData = async () => {
     try {
       const currentUser = await getCurrentUser()
+
+      if (!currentUser) {
+        throw new Error('No se pudo obtener el usuario actual')
+      }
+
       const userProfile = await getUserProfile(currentUser.id)
       
       // Verificar que el usuario sea profesor
@@ -43,14 +63,14 @@ export default function ManageClassesPage() {
       
       await loadClasses(currentUser.id)
     } catch (error) {
-      console.error('Error loading data:', error)
+      console.error('Error loading data:', (error as Error))
       router.push('/login')
     } finally {
       setLoading(false)
     }
   }
 
-  const loadClasses = async (teacherId) => {
+  const loadClasses = async (teacherId: string) => {
     try {
       // Obtener clases del profesor actual con conteo de reservas
       const { data: classesData, error: classesError } = await supabase
@@ -91,7 +111,7 @@ export default function ManageClassesPage() {
     }
   }
 
-  const handleFormSubmit = async (e) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setFormLoading(true)
 
@@ -116,10 +136,11 @@ export default function ManageClassesPage() {
             day_of_week: parseInt(formData.day_of_week),
             start_time: formData.start_time,
             end_time: formData.end_time,
-            max_capacity: parseInt(formData.max_capacity)
+            max_capacity: parseInt(formData.max_capacity),
+            available_spots: parseInt(formData.max_capacity)
           })
           .eq('id', editingClass.id)
-          .eq('teacher_id', user.id) // Seguridad adicional
+          .eq('teacher_id', user?.id)
 
         if (error) throw error
         alert('Clase actualizada con éxito')
@@ -128,13 +149,14 @@ export default function ManageClassesPage() {
         const { error } = await supabase
           .from('classes')
           .insert([{
-            teacher_id: user.id,
+            teacher_id: user?.id,
             title: formData.title,
             description: formData.description,
             day_of_week: parseInt(formData.day_of_week),
             start_time: formData.start_time,
             end_time: formData.end_time,
-            max_capacity: parseInt(formData.max_capacity)
+            max_capacity: parseInt(formData.max_capacity),
+            available_spots: parseInt(formData.max_capacity)
           }])
 
         if (error) throw error
@@ -142,17 +164,20 @@ export default function ManageClassesPage() {
       }
 
       // Recargar clases y resetear formulario
-      await loadClasses(user.id)
+      if(user) {
+        await loadClasses(user.id)
+      }
+      
       resetForm()
     } catch (error) {
       console.error('Error saving class:', error)
-      alert('Error: ' + error.message)
+      alert('Error: ' + (error as Error).message)
     } finally {
       setFormLoading(false)
     }
   }
 
-  const handleEdit = (classItem) => {
+  const handleEdit = (classItem: ClassItem) => {
     setEditingClass(classItem)
     setFormData({
       title: classItem.title,
@@ -160,12 +185,12 @@ export default function ManageClassesPage() {
       day_of_week: classItem.day_of_week.toString(),
       start_time: classItem.start_time,
       end_time: classItem.end_time,
-      max_capacity: classItem.max_capacity
+      max_capacity: classItem.max_capacity.toString()
     })
     setShowForm(true)
   }
 
-  const handleDelete = async (classId) => {
+  const handleDelete = async (classId: string) => {
     if (!confirm('¿Estás seguro de que quieres eliminar esta clase? Esta acción no se puede deshacer.')) {
       return
     }
@@ -175,15 +200,19 @@ export default function ManageClassesPage() {
         .from('classes')
         .delete()
         .eq('id', classId)
-        .eq('teacher_id', user.id) // Seguridad adicional
+        .eq('teacher_id', user?.id)
 
       if (error) throw error
       
       alert('Clase eliminada con éxito')
-      await loadClasses(user.id)
+      
+      if(user) {
+        await loadClasses(user.id)
+      }
+      
     } catch (error) {
       console.error('Error deleting class:', error)
-      alert('Error al eliminar la clase: ' + error.message)
+      alert('Error al eliminar la clase: ' + (error as Error).message)
     }
   }
 
@@ -194,13 +223,13 @@ export default function ManageClassesPage() {
       day_of_week: '',
       start_time: '',
       end_time: '',
-      max_capacity: 10
+      max_capacity: '10'
     })
     setEditingClass(null)
     setShowForm(false)
   }
 
-  const formatTime = (timeString) => {
+  const formatTime = (timeString: string) => {
     const [hours, minutes] = timeString.split(':')
     return `${hours}:${minutes}`
   }
@@ -323,7 +352,7 @@ export default function ManageClassesPage() {
                     min="1"
                     max="50"
                     value={formData.max_capacity}
-                    onChange={(e) => setFormData({...formData, max_capacity: parseInt(e.target.value)})}
+                    onChange={(e) => setFormData({...formData, max_capacity: e.target.value})}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     required
                   />

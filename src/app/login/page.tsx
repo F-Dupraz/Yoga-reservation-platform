@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const router = useRouter()
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -38,13 +38,13 @@ export default function LoginPage() {
       router.push('/dashboard')
     } catch (err) {
       // Mostrar error de autenticación de manera amigable
-      setError(err.message)
+      setError((err as Error).message)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value

@@ -4,8 +4,17 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentUser, getUserProfile, signOut, supabase } from '@/lib/supabase'
 
+type Profile = {
+  id: string
+  email: string
+  full_name: string
+  role: 'teacher' | 'student'
+  created_at: string
+  updated_at: string
+}
+
 export default function Dashboard() {
-  const [profile, setProfile] = useState(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     totalClasses: 0,
@@ -23,6 +32,11 @@ export default function Dashboard() {
     try {
       // Obtener usuario actual y su perfil completo
       const currentUser = await getCurrentUser()
+
+      if (!currentUser) {
+        throw new Error('No se pudo obtener el usuario actual')
+      }
+
       const userProfile = await getUserProfile(currentUser.id)
       
       setProfile(userProfile)
@@ -38,7 +52,7 @@ export default function Dashboard() {
     }
   }
 
-  const loadStats = async (userProfile) => {
+  const loadStats = async (userProfile: Profile) => {
     try {
       if (userProfile.role === 'teacher') {
         // Para profesores: contar clases creadas
