@@ -102,8 +102,6 @@ export default function ClassesPageContent() {
         .order('start_time', { ascending: true })
 
       if (classesError) throw classesError
-
-      console.log('Classes loaded:', classesData)
       setClasses(classesData || [])
 
     } catch (error) {
@@ -127,7 +125,6 @@ export default function ClassesPageContent() {
       
       // Extraer solo los IDs de las clases reservadas
       const reservedClassIds = data.map(reservation => reservation.class_id)
-      console.log('User reservations loaded:', reservedClassIds) // Debug
       setUserReservations(reservedClassIds)
     } catch (error) {
       console.error('Error loading user reservations:', error)
@@ -181,7 +178,6 @@ export default function ClassesPageContent() {
       // Actualizar estado local
       setUserReservations(prev => {
         const newReservations = [...prev, classId]
-        console.log('Updated reservations after add:', newReservations) // Debug
         return newReservations
       })
       
@@ -236,7 +232,6 @@ export default function ClassesPageContent() {
       // Actualizar estado local
       setUserReservations(prev => {
         const newReservations = prev.filter(id => id !== classId)
-        console.log('Updated reservations after cancel:', newReservations) // Debug
         return newReservations
       })
       

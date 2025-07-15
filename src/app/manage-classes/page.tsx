@@ -14,6 +14,7 @@ type ClassItem = {
   end_time: string
   max_capacity: number
   current_reservations: number
+  namesReserved: string[]
   teacher_id: string
   created_at: string
   updated_at: string
@@ -72,39 +73,41 @@ export default function ManageClassesPage() {
 
   const loadClasses = async (teacherId: string) => {
     try {
-      // Obtener clases del profesor actual con conteo de reservas
       const { data: classesData, error: classesError } = await supabase
         .from('classes')
         .select('*')
         .eq('teacher_id', teacherId)
         .order('day_of_week', { ascending: true })
-        .order('start_time', { ascending: true })
+        .order('start_time', { ascending: true });
 
       if (classesError) {
         console.error('Error loading classes: ', classesError)
         throw classesError
       }
 
-      // Procesar datos para incluir conteo de reservas
-      const classesWithCount = await Promise.all(
-        classesData.map(async (classItem) => {
-          const { count: reservationCount, error: countError } = await supabase
-            .from('reservations')
-            .select('*', {count: 'exact', head: true})
-            .eq('class_id', classItem.id)
-        
-          if(countError) {
-            console.log('Error counting reservations for classes: ', countError)
-          }
+      const classIds = classesData?.map(c => c.id) || [];
+      const { data: reservations, error: reservationsError } = await supabase
+        .from('reservations')
+        .select(`
+          class_id,
+          profiles:student_id (
+            full_name
+          )
+        `)
+        .in('class_id', classIds)
 
-          return {
-            ...classItem,
-            current_reservations: reservationCount || 0
-          }
-        })
-      )
+      if(reservationsError) {
+        console.log('Error counting reservations for classes: ', reservationsError)
+      }
 
-      setClasses(classesWithCount)
+      const classesWithNames = classesData?.map(cla => ({
+        ...cla,
+        namesReserved: reservations
+          ?.filter(r => r.class_id === cla.id)
+          ?.map(r => r.profiles.full_name) || []
+      }))
+      
+      setClasses(classesWithNames)
 
     } catch (error) {
       console.error('Error loading classes:', error)
@@ -466,7 +469,11 @@ export default function ManageClassesPage() {
                         Alumnos Inscritos ({classItem.current_reservations})
                       </h5>
                       <div className="text-sm text-gray-600">
-                        <p>Para ver la lista detallada de alumnos, puedes consultar desde la base de datos o implementar una vista específica en futuras versiones.</p>
+                        {classItem.namesReserved.length > 0 && classItem.namesReserved.map(stud => (
+                          <div key={stud}>
+                            <p className="text-gray-600 text-sm">{stud}.</p>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
