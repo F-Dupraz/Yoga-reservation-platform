@@ -96,7 +96,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="spinner h-12 w-12"></div>
       </div>
     )
   }
@@ -106,9 +106,9 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900">Error de autenticación</h2>
-          <p className="text-gray-600 mt-2">Por favor, inicia sesión nuevamente</p>
-          <Link href="/login" className="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+          <h2 className="text-xl font-semibold text-neutral-900">Error de autenticación</h2>
+          <p className="text-neutral-600 mt-2">Por favor, inicia sesión nuevamente</p>
+          <Link href="/login" className="mt-4 inline-block btn-primary">
             Ir al Login
           </Link>
         </div>
@@ -117,20 +117,20 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-50">
       {/* Header con navegación y logout */}
-      <div className="bg-white shadow">
+      <div className="bg-white shadow-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-sm text-gray-600">
+              <h1 className="text-3xl font-bold text-neutral-900">Dashboard</h1>
+              <p className="text-sm text-neutral-600">
                 Bienvenido, {profile.full_name} ({profile.role === 'teacher' ? 'Profesor' : 'Alumno'})
               </p>
             </div>
             <button
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              className="btn-danger"
             >
               Cerrar Sesión
             </button>
@@ -141,20 +141,20 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Tarjetas de estadísticas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+          <div className="card">
+            <div className="card-body">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">A</span>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: 'var(--primary-500)'}} >
+                    <span className="text-white font-extrabold text-lg">A</span>
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-neutral-500 truncate">
                       Estado
                     </dt>
-                    <dd className="text-lg font-semibold text-gray-900">
+                    <dd className="text-lg font-semibold text-neutral-900">
                       {profile.role === 'teacher' ? 'Profesor Activo' : 'Alumno Activo'}
                     </dd>
                   </dl>
@@ -166,47 +166,47 @@ export default function Dashboard() {
 
         {/* Tarjetas de estadísticas - ANTES de las acciones rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <dt className="text-sm font-medium text-gray-500">Total de Clases</dt>
-              <dd className="text-2xl font-semibold text-gray-900">{stats.totalClasses}</dd>
+          <div className="card">
+            <div className="card-body">
+              <dt className="text-sm font-medium text-neutral-500">Clases disponibles</dt>
+              <dd className="text-2xl font-semibold text-neutral-900">{stats.totalClasses}</dd>
             </div>
           </div>
   
           {profile.role === 'teacher' ? (
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <dt className="text-sm font-medium text-gray-500">Mis Clases</dt>
-              <dd className="text-2xl font-semibold text-gray-900">{stats.myClasses}</dd>
+          <div className="card">
+            <div className="card-body">
+              <dt className="text-sm font-medium text-neutral-500">Mis Clases</dt>
+              <dd className="text-2xl font-semibold text-neutral-900">{stats.myClasses}</dd>
             </div>
           </div>
           ) : (
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <dt className="text-sm font-medium text-gray-500">Mis Reservas</dt>
-              <dd className="text-2xl font-semibold text-gray-900">{stats.myReservations}</dd>
+          <div className="card">
+            <div className="card-body">
+              <dt className="text-sm font-medium text-neutral-500">Mis Reservas</dt>
+              <dd className="text-2xl font-semibold text-neutral-900">{stats.myReservations}</dd>
             </div>
           </div>
           )}
         </div>
 
         {/* Acciones rápidas según el rol */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Acciones Rápidas</h3>
+        <div className="card">
+          <div className="card-header">
+            <h3 className="text-lg font-medium text-neutral-900">Acciones Rápidas</h3>
           </div>
-          <div className="p-6">
+          <div className="card-body">
             {profile.role === 'teacher' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Link
                   href="/manage-classes"
-                  className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
+                  className="btn-primary flex items-center justify-center"
                 >
                   Gestionar Mis Clases
                 </Link>
                 <Link
                   href="/classes"
-                  className="flex items-center justify-center px-6 py-3 border border-indigo-300 text-base font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+                  className="btn-outline flex items-center justify-center"
                 >
                   Ver Todas las Clases
                 </Link>
@@ -215,13 +215,13 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Link
                   href="/classes"
-                  className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
+                  className="btn-primary flex items-center justify-center"
                 >
                   Explorar Clases
                 </Link>
                 <Link
                   href="/classes?filter=my-reservations"
-                  className="flex items-center justify-center px-6 py-3 border border-indigo-300 text-base font-medium rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+                  className="btn-outline flex items-center justify-center"
                 >
                   Mis Reservas
                 </Link>
@@ -231,22 +231,22 @@ export default function Dashboard() {
         </div>
 
         {/* Información contextual según el rol */}
-        <div className="mt-8 bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">
+        <div className="mt-8 card">
+          <div className="card-header">
+            <h3 className="text-lg font-medium text-neutral-900">
               {profile.role === 'teacher' ? 'Panel de Profesor' : 'Panel de Alumno'}
             </h3>
           </div>
-          <div className="p-6">
+          <div className="card-body">
             {profile.role === 'teacher' ? (
               <div className="space-y-4">
-                <p className="text-gray-600">
+                <p className="text-neutral-600">
                   Como profesor, puedes crear y gestionar tus clases de yoga. Cada clase puede tener 
                   horarios específicos, capacidad máxima y descripción detallada.
                 </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Funcionalidades disponibles:</h4>
-                  <ul className="text-sm text-blue-800 space-y-1">
+                <div className="yoga-section">
+                  <h4 className="font-medium text-secondary-900 mb-2">Funcionalidades disponibles:</h4>
+                  <ul className="text-sm text-secondary-800 space-y-1">
                     <li>Crear nuevas clases con horarios personalizados</li>
                     <li>Editar información de clases existentes</li>
                     <li>Ver lista de alumnos inscritos en cada clase</li>
@@ -256,13 +256,13 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                <p className="text-gray-600">
+                <p className="text-neutral-600">
                   Como alumno, puedes explorar todas las clases disponibles y reservar tu lugar 
                   en las que más te interesen.
                 </p>
-                <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                  <h4 className="font-medium text-green-900 mb-2">Funcionalidades disponibles:</h4>
-                  <ul className="text-sm text-green-800 space-y-1">
+                <div className="yoga-section">
+                  <h4 className="font-medium text-secondary-900 mb-2">Funcionalidades disponibles:</h4>
+                  <ul className="text-sm text-secondary-800 space-y-1">
                     <li>Explorar todas las clases disponibles</li>
                     <li>Reservar lugar en clases que te interesen</li>
                     <li>Ver tus reservas activas</li>
@@ -277,4 +277,3 @@ export default function Dashboard() {
     </div>
   )
 }
-

@@ -32,7 +32,7 @@ export default function RootLayout({
         <link rel="manifest" href="./manifest.json" />
       </head>
       <body className={inter.className}>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-neutral-50">
           {children}
         </div>
       </body>

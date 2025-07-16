@@ -102,6 +102,9 @@ export default function ClassesPageContent() {
         .order('start_time', { ascending: true })
 
       if (classesError) throw classesError
+      
+      console.log(classesData)
+
       setClasses(classesData || [])
 
     } catch (error) {
@@ -267,26 +270,26 @@ export default function ClassesPageContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="spinner h-12 w-12"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-50">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-white shadow-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Clases de Yoga</h1>
-              <p className="text-sm text-gray-600">
+              <h1 className="text-3xl font-bold text-neutral-900">Clases de Yoga</h1>
+              <p className="text-sm text-neutral-600">
                 {filter === 'my-reservations' ? 'Mis reservas activas' : 'Explora y reserva clases'}
               </p>
             </div>
             <Link
               href="/dashboard"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              className="btn-primary"
             >
               Volver al Dashboard
             </Link>
@@ -299,32 +302,35 @@ export default function ClassesPageContent() {
         <div className="mb-6 flex flex-wrap gap-2">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-smooth border ${
               filter === 'all'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                ? 'border-transparent text-white shadow-soft'
+                : 'bg-white text-neutral-700 border-neutral-400 hover:bg-neutral-50'
             }`}
+            style={filter === 'all' ? {backgroundColor: 'var(--primary-500)'} : {}}
           >
             Todas las Clases
           </button>
           <button
             onClick={() => setFilter('available')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-smooth border ${
               filter === 'available'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                ? 'border-transparent text-white shadow-soft'
+                : 'bg-white text-neutral-700 border-neutral-400 hover:bg-neutral-50'
             }`}
+            style={filter === 'available' ? {backgroundColor: 'var(--primary-500)'} : {}}
           >
             Con Cupos Disponibles
           </button>
           {profile?.role === 'student' && (
             <button
               onClick={() => setFilter('my-reservations')}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-smooth border ${
                 filter === 'my-reservations'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  ? 'border-transparent text-white shadow-soft'
+                  : 'bg-white text-neutral-700 border-neutral-400 hover:bg-neutral-50'
               }`}
+              style={filter === 'my-reservations' ? {backgroundColor: 'var(--primary-500)'} : {}}
             >
               Mis Reservas ({userReservations.length})
             </button>
@@ -334,7 +340,7 @@ export default function ClassesPageContent() {
         {/* Lista de clases */}
         {filteredClasses.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-500">
+            <div className="text-neutral-500">
               {filter === 'my-reservations' 
                 ? 'No tienes reservas activas' 
                 : 'No hay clases disponibles'}
@@ -348,33 +354,33 @@ export default function ClassesPageContent() {
               const isLoading = reservationLoading === classItem.id
 
               return (
-                <div key={classItem.id} className="bg-white shadow rounded-lg overflow-hidden">
+                <div key={classItem.id} className="class-card">
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{classItem.title}</h3>
+                      <h3 className="text-lg font-semibold text-neutral-900">{classItem.title}</h3>
                       <div className="flex items-center space-x-2">
                         <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          isFull ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                          isFull ? 'bg-red-100 text-red-800' : 'badge-success'
                         }`}>
                           {classItem.available_spots} cupos
                         </div>
                       </div>
                     </div>
                     
-                    <p className="text-gray-600 text-sm mb-4">{classItem.description}</p>
+                    <p className="text-neutral-600 text-sm mb-4">{classItem.description}</p>
                     
-                    <div className="space-y-2 text-sm text-gray-700 mb-4">
+                    <div className="space-y-2 text-sm text-neutral-700 mb-4">
                       <div className="flex items-center">
                         <span className="font-medium w-20">Día:</span>
                         <span>{dayNames[classItem.day_of_week]}</span>
                       </div>
                       <div className="flex items-center">
                         <span className="font-medium w-20">Horario:</span>
-                        <span>{formatTime(classItem.start_time)} - {formatTime(classItem.end_time)}</span>
+                        <span className="time-slot">{formatTime(classItem.start_time)} - {formatTime(classItem.end_time)}</span>
                       </div>
                       <div className="flex items-center">
                         <span className="font-medium w-20">Profesor:</span>
-                        <span>{classItem.teacher?.full_name || 'No disponible'}</span>
+                        <span className="instructor-badge">{classItem.teacher?.full_name || 'No disponible'}</span>
                       </div>
                       <div className="flex items-center">
                         <span className="font-medium w-20">Capacidad:</span>
@@ -389,7 +395,7 @@ export default function ClassesPageContent() {
                           <button
                             onClick={() => handleCancelReservation(classItem.id)}
                             disabled={isLoading}
-                            className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm font-medium"
+                            className="btn-danger w-full disabled:opacity-50"
                           >
                             {isLoading ? 'Procesando...' : 'Cancelar Reserva'}
                           </button>
@@ -397,7 +403,7 @@ export default function ClassesPageContent() {
                           <button
                             onClick={() => handleReservation(classItem.id)}
                             disabled={isFull || isLoading}
-                            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md text-sm font-medium"
+                            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {isLoading ? 'Procesando...' : (isFull ? 'Sin Cupos' : 'Reservar')}
                           </button>

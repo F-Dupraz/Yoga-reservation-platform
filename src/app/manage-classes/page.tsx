@@ -139,9 +139,7 @@ export default function ManageClassesPage() {
             description: formData.description,
             day_of_week: parseInt(formData.day_of_week),
             start_time: formData.start_time,
-            end_time: formData.end_time,
-            max_capacity: parseInt(formData.max_capacity),
-            available_spots: parseInt(formData.max_capacity)
+            end_time: formData.end_time
           })
           .eq('id', editingClass.id)
           .eq('teacher_id', user?.id)
@@ -241,31 +239,31 @@ export default function ManageClassesPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="spinner h-12 w-12"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-50">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="bg-white shadow-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gestionar Mis Clases</h1>
-              <p className="text-sm text-gray-600">Crea, edita y organiza tus clases de yoga</p>
+              <h1 className="text-3xl font-bold text-neutral-900">Gestionar Mis Clases</h1>
+              <p className="text-sm text-neutral-600">Crea, edita y organiza tus clases de yoga</p>
             </div>
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                className="btn-primary"
               >
                 Nueva Clase
               </button>
               <Link
                 href="/dashboard"
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                className="btn-secondary"
               >
                 Volver al Dashboard
               </Link>
@@ -277,16 +275,16 @@ export default function ManageClassesPage() {
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Formulario de crear/editar clase */}
         {showForm && (
-          <div className="bg-white shadow rounded-lg mb-8">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">
+          <div className="card mb-8">
+            <div className="card-header">
+              <h3 className="text-lg font-medium text-neutral-900">
                 {editingClass ? 'Editar Clase' : 'Nueva Clase'}
               </h3>
             </div>
-            <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleFormSubmit} className="card-body space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                <div className="form-group">
+                  <label htmlFor="title" className="form-label">
                     Título de la Clase *
                   </label>
                   <input
@@ -294,21 +292,21 @@ export default function ManageClassesPage() {
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="input-base form-input"
                     placeholder="Ej: Yoga Vinyasa Principiantes"
                     required
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="day_of_week" className="block text-sm font-medium text-gray-700">
+                <div className="form-group">
+                  <label htmlFor="day_of_week" className="form-label">
                     Día de la Semana *
                   </label>
                   <select
                     id="day_of_week"
                     value={formData.day_of_week}
                     onChange={(e) => setFormData({...formData, day_of_week: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="form-select"
                     required
                   >
                     <option value="">Selecciona un día</option>
@@ -318,8 +316,8 @@ export default function ManageClassesPage() {
                   </select>
                 </div>
 
-                <div>
-                  <label htmlFor="start_time" className="block text-sm font-medium text-gray-700">
+                <div className="form-group">
+                  <label htmlFor="start_time" className="form-label">
                     Hora de Inicio *
                   </label>
                   <input
@@ -327,13 +325,13 @@ export default function ManageClassesPage() {
                     id="start_time"
                     value={formData.start_time}
                     onChange={(e) => setFormData({...formData, start_time: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="input-base form-input"
                     required
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="end_time" className="block text-sm font-medium text-gray-700">
+                <div className="form-group">
+                  <label htmlFor="end_time" className="form-label">
                     Hora de Fin *
                   </label>
                   <input
@@ -341,30 +339,33 @@ export default function ManageClassesPage() {
                     id="end_time"
                     value={formData.end_time}
                     onChange={(e) => setFormData({...formData, end_time: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    className="input-base form-input"
                     required
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="max_capacity" className="block text-sm font-medium text-gray-700">
-                    Capacidad Máxima *
-                  </label>
-                  <input
-                    type="number"
-                    id="max_capacity"
-                    min="1"
-                    max="50"
-                    value={formData.max_capacity}
-                    onChange={(e) => setFormData({...formData, max_capacity: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                </div>
+                {!editingClass && (
+                  <div className="form-group">
+                    <label htmlFor="max_capacity" className="form-label">
+                      Capacidad Máxima *
+                    </label>
+                    <input
+                      type="number"
+                      id="max_capacity"
+                      min="1"
+                      max="50"
+                      value={formData.max_capacity}
+                      onChange={(e) => setFormData({...formData, max_capacity: e.target.value})}
+                      className="input-base form-input"
+                      required
+                    />
+                  </div>
+                )}
+
               </div>
 
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              <div className="form-group">
+                <label htmlFor="description" className="form-label">
                   Descripción
                 </label>
                 <textarea
@@ -372,7 +373,7 @@ export default function ManageClassesPage() {
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="form-textarea"
                   placeholder="Descripción de la clase, nivel requerido, qué traer, etc."
                 />
               </div>
@@ -381,14 +382,14 @@ export default function ManageClassesPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md text-sm font-medium"
+                  className="btn-secondary"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm font-medium"
+                  className="btn-primary disabled:opacity-50"
                 >
                   {formLoading ? 'Guardando...' : (editingClass ? 'Actualizar' : 'Crear Clase')}
                 </button>
@@ -398,49 +399,49 @@ export default function ManageClassesPage() {
         )}
 
         {/* Lista de clases del profesor */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="card">
+          <div className="card-header">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Mis Clases ({classes.length})</h3>
+              <h3 className="text-lg font-medium text-neutral-900">Mis Clases ({classes.length})</h3>
             </div>
           </div>
           
           {classes.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
+            <div className="card-body text-center text-neutral-500">
               <p>No tienes clases creadas aún.</p>
               <button
                 onClick={() => setShowForm(true)}
-                className="mt-2 text-indigo-600 hover:text-indigo-700 font-medium"
+                className="mt-2 text-primary-600 hover:text-primary-700 font-medium"
               >
                 Crear tu primera clase
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-neutral-200">
               {classes.map((classItem) => (
                 <div key={classItem.id} className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-4 mb-2">
-                        <h4 className="text-lg font-semibold text-gray-900">{classItem.title}</h4>
+                        <h4 className="text-lg font-semibold text-neutral-900">{classItem.title}</h4>
                         <div className="flex items-center space-x-2">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span className="badge-primary">
                             {dayNames[classItem.day_of_week]}
                           </span>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <span className="badge-success">
                             {formatTime(classItem.start_time)} - {formatTime(classItem.end_time)}
                           </span>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          <span className="badge-secondary">
                             {classItem.current_reservations}/{classItem.max_capacity} inscritos
                           </span>
                         </div>
                       </div>
                       
                       {classItem.description && (
-                        <p className="text-gray-600 text-sm mb-3">{classItem.description}</p>
+                        <p className="text-neutral-600 text-sm mb-3">{classItem.description}</p>
                       )}
                       
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-neutral-500">
                         Creada el: {new Date(classItem.created_at).toLocaleDateString('es-ES')}
                         {classItem.updated_at !== classItem.created_at && (
                           <span> • Última actualización: {new Date(classItem.updated_at).toLocaleDateString('es-ES')}</span>
@@ -451,13 +452,13 @@ export default function ManageClassesPage() {
                     <div className="flex items-center space-x-2 ml-4">
                       <button
                         onClick={() => handleEdit(classItem)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-sm font-medium"
+                        className="btn-primary"
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => handleDelete(classItem.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium"
+                        className="btn-danger"
                       >
                         Eliminar
                       </button>
@@ -465,14 +466,14 @@ export default function ManageClassesPage() {
                   </div>
                   
                   {classItem.current_reservations > 0 && (
-                    <div className="mt-4 p-3 bg-gray-50 rounded-md">
-                      <h5 className="text-sm font-medium text-gray-700 mb-2">
+                    <div className="mt-4 p-3 bg-neutral-50 rounded-lg">
+                      <h5 className="text-sm font-medium text-neutral-700 mb-2">
                         Alumnos Inscritos ({classItem.current_reservations})
                       </h5>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-neutral-600">
                         {classItem.namesReserved.length > 0 && classItem.namesReserved.map(stud => (
                           <div key={stud}>
-                            <p className="text-gray-600 text-sm">{stud}.</p>
+                            <p className="text-neutral-600 text-sm">{stud}.</p>
                           </div>
                         ))}
                       </div>
