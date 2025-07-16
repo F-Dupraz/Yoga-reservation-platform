@@ -100,11 +100,12 @@ export default function ManageClassesPage() {
         console.log('Error counting reservations for classes: ', reservationsError)
       }
 
+      // The .map was debbuged with Claude, I dont really know why I have that error, maybe is something with supabase
       const classesWithNames = classesData?.map(cla => ({
         ...cla,
         namesReserved: reservations
           ?.filter(r => r.class_id === cla.id)
-          ?.map(r => r.profiles.full_name) || []
+          ?.map(r => (r.profiles as unknown as { full_name: string }).full_name) || []
       }))
       
       setClasses(classesWithNames)
