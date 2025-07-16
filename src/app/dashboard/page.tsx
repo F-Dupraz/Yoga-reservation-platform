@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { getCurrentUser, getUserProfile, signOut, supabase } from '@/lib/supabase'
+import { getCurrentUser, getUserProfile, signOut } from '@/lib/supabase'
 
 type Profile = {
   id: string
@@ -16,11 +16,6 @@ type Profile = {
 export default function Dashboard() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({
-    totalClasses: 0,
-    myReservations: 0,
-    myClasses: 0
-  })
   const router = useRouter()
 
   // Cargar datos del usuario y estadísticas al montar el componente
@@ -40,46 +35,13 @@ export default function Dashboard() {
       const userProfile = await getUserProfile(currentUser.id)
       
       setProfile(userProfile)
-      
-      // Cargar estadísticas específicas según el rol
-      await loadStats(userProfile)
+
     } catch (error) {
       console.error('Error loading user data:', error)
       // Si hay error de autenticación, redirigir al login
       router.push('/login')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const loadStats = async (userProfile: Profile) => {
-    try {
-      if (userProfile.role === 'teacher') {
-        // Para profesores: contar clases creadas
-        const { count: classCount } = await supabase
-          .from('classes')
-          .select('*', { count: 'exact', head: true })
-          .eq('teacher_id', userProfile.id)
-
-        setStats(prev => ({ ...prev, myClasses: classCount || 0 }))
-      } else {
-        // Para alumnos: contar reservas activas
-        const { count: reservationCount } = await supabase
-          .from('reservations')
-          .select('*', { count: 'exact', head: true })
-          .eq('student_id', userProfile.id)
-
-        setStats(prev => ({ ...prev, myReservations: reservationCount || 0 }))
-      }
-
-      // Para ambos roles: total de clases disponibles
-      const { count: totalClassCount } = await supabase
-        .from('classes')
-        .select('*', { count: 'exact', head: true })
-
-      setStats(prev => ({ ...prev, totalClasses: totalClassCount || 0 }))
-    } catch (error) {
-      console.error('Error loading stats:', error)
     }
   }
 
@@ -146,7 +108,7 @@ export default function Dashboard() {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: 'var(--primary-500)'}} >
-                    <span className="text-white font-extrabold text-lg">A</span>
+                    <span className="text-white font-extrabold text-lg">{profile.full_name.slice(0, 2)}</span>
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
@@ -162,32 +124,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Tarjetas de estadísticas - ANTES de las acciones rápidas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="card">
-            <div className="card-body">
-              <dt className="text-sm font-medium text-neutral-500">Clases disponibles</dt>
-              <dd className="text-2xl font-semibold text-neutral-900">{stats.totalClasses}</dd>
-            </div>
-          </div>
-  
-          {profile.role === 'teacher' ? (
-          <div className="card">
-            <div className="card-body">
-              <dt className="text-sm font-medium text-neutral-500">Mis Clases</dt>
-              <dd className="text-2xl font-semibold text-neutral-900">{stats.myClasses}</dd>
-            </div>
-          </div>
-          ) : (
-          <div className="card">
-            <div className="card-body">
-              <dt className="text-sm font-medium text-neutral-500">Mis Reservas</dt>
-              <dd className="text-2xl font-semibold text-neutral-900">{stats.myReservations}</dd>
-            </div>
-          </div>
-          )}
         </div>
 
         {/* Acciones rápidas según el rol */}

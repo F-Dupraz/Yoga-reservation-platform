@@ -13,10 +13,12 @@ export default function LoginPage() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setIsSubmitted(true)
     setLoading(true)
     setError('')
 
@@ -149,6 +151,17 @@ export default function LoginPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
               {error}
+            </div>
+          )}
+
+          {(!isLogin && isSubmitted) && (
+            <div className="border border-transparent px-4 py-3 rounded-lg" style={{backgroundColor: 'var(--accent-sage)', borderColor: 'var(--secondary-300)', color: 'var(--secondary-800)'}}>
+              <div className="flex items-center">
+                <div>
+                   <p className="font-medium mb-1">¡Bienvenido!</p>
+                   <p className="text-sm">Te hemos enviado un email de confirmación. Una vez que confirmes tu cuenta, podrás iniciar sesión y comenzar.</p>
+                </div>
+              </div>
             </div>
           )}
 
