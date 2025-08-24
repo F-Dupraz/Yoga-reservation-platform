@@ -1,3 +1,4 @@
+// src/app/classes/ClassesPageContent.tsx - VERSIÓN ACTUALIZADA COMPLETA
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -22,7 +23,7 @@ type ClassItem = {
   start_time: string
   end_time: string
   max_capacity: number
-  current_reservations: number
+  current_reservations: number // mantener el nombre por compatibilidad con triggers
   available_spots: number
   teacher_id: string
   teacher?: {
@@ -38,21 +39,19 @@ export default function ClassesPageContent() {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [classes, setClasses] = useState<ClassItem[]>([])
-  const [userReservations, setUserReservations] = useState<string[]>([])
+  const [userEnrollments, setUserEnrollments] = useState<string[]>([]) // CAMBIADO
   const [loading, setLoading] = useState(true)
-  const [reservationLoading, setReservationLoading] = useState<string | null>(null)
+  const [enrollmentLoading, setEnrollmentLoading] = useState<string | null>(null) // CAMBIADO
   const [filter, setFilter] = useState('all')
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Mapeo de días de la semana para mostrar texto legible
   const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
   useEffect(() => {
-    // Verificar si hay filtro en URL (para "Mis Reservas" desde dashboard)
     const urlFilter = searchParams.get('filter')
-    if (urlFilter === 'my-reservations') {
-      setFilter('my-reservations')
+    if (urlFilter === 'my-classes') { // CAMBIADO de my-reservations
+      setFilter('my-classes')
     }
     
     loadData()
@@ -60,10 +59,8 @@ export default function ClassesPageContent() {
 
   const loadData = async () => {
     try {
-      // Cargar usuario actual y perfil
       const currentUser = await getCurrentUser()
       
-      // Verificar que currentUser existe
       if (!currentUser) {
         throw new Error('No se pudo obtener el usuario actual')
       }
@@ -73,10 +70,9 @@ export default function ClassesPageContent() {
       setUser(currentUser)
       setProfile(userProfile)
       
-      // Cargar clases y reservas del usuario
       await Promise.all([
         loadClasses(), 
-        loadUserReservations(currentUser.id)
+        loadUserEnrollments(currentUser.id) // CAMBIADO
       ])
     } catch (error) {
       console.error('Error loading data:', error)
@@ -103,8 +99,6 @@ export default function ClassesPageContent() {
 
       if (classesError) throw classesError
       
-      console.log(classesData)
-
       setClasses(classesData || [])
 
     } catch (error) {
@@ -113,32 +107,30 @@ export default function ClassesPageContent() {
     }
   }
 
-  const loadUserReservations = async (userId: string) => {
+  const loadUserEnrollments = async (userId: string) => { // CAMBIADO
     try {
       const { data, error } = await supabase
-        .from('reservations')
+        .from('class_enrollments') // CAMBIADO
         .select('class_id')
         .eq('student_id', userId)
 
       if (error) {
-        console.error('Error loading user reservations:', error)
-        setUserReservations([])
+        console.error('Error loading user enrollments:', error)
+        setUserEnrollments([])
         return
       }
       
-      // Extraer solo los IDs de las clases reservadas
-      const reservedClassIds = data.map(reservation => reservation.class_id)
-      setUserReservations(reservedClassIds)
+      const enrolledClassIds = data.map(enrollment => enrollment.class_id)
+      setUserEnrollments(enrolledClassIds)
     } catch (error) {
-      console.error('Error loading user reservations:', error)
-      setUserReservations([])
+      console.error('Error loading user enrollments:', error)
+      setUserEnrollments([])
     }
   }
 
-  const handleReservation = async (classId: string) => {
-    // Solo alumnos pueden hacer reservas
+  const handleEnrollment = async (classId: string, teacherId: string) => { // CAMBIADO
     if (!profile || profile.role !== 'student') {
-      alert('Solo los alumnos pueden reservar clases')
+      alert('Solo los alumnos pueden inscribirse a clases')
       return
     }
 
@@ -147,124 +139,122 @@ export default function ClassesPageContent() {
       return
     }
 
-    setReservationLoading(classId)
+    setEnrollmentLoading(classId)
     
     try {
-      // Verificar si ya tiene reserva ANTES de intentar reservar
-      const { data: existingReservation, error: checkError } = await supabase
-        .from('reservations')
+      // Verificar límite con el profesor específico
+      const { data: limitData, error: limitError } = await supabase
+        .from('teacher_student_limits')
+        .select('weekly_class_limit')
+        .eq('teacher_id', teacherId)
+        .eq('student_id', user.id)
+        .single()
+
+      if (limitError || !limitData) {
+        alert('No tienes cupos asignados con este profesor. Contacta al profesor para solicitar acceso.')
+        setEnrollmentLoading(null)
+        return
+      }
+
+      // Contar inscripciones actuales con ese profesor
+      const { count, error: countError } = await supabase
+        .from('class_enrollments')
+        .select('*', { count: 'exact', head: true })
+        .eq('student_id', user.id)
+        .in('class_id', (
+          await supabase
+            .from('classes')
+            .select('id')
+            .eq('teacher_id', teacherId)
+        ).data?.map(c => c.id) || [])
+
+      if (countError) throw countError
+
+      const currentCount = count || 0
+
+      if (currentCount >= limitData.weekly_class_limit) {
+        alert(`Ya alcanzaste tu límite de ${limitData.weekly_class_limit} clases con este profesor.`)
+        setEnrollmentLoading(null)
+        return
+      }
+
+      // Verificar si ya está inscrito
+      const { data: existingEnrollment } = await supabase
+        .from('class_enrollments')
         .select('id')
         .eq('student_id', user.id)
         .eq('class_id', classId)
         .single()
 
-      if (checkError && checkError.code !== 'PGRST116') {
-        // PGRST116 = no rows returned, que es lo que esperamos si no hay reserva
-        throw checkError
-      }
-
-      if (existingReservation) {
-        alert('Ya tienes una reserva para esta clase')
+      if (existingEnrollment) {
+        alert('Ya estás inscrito en esta clase')
         return
       }
 
-      // Proceder con la reserva
+      // Inscribir al alumno
       const { error } = await supabase
-        .from('reservations')
-        .insert([{
+        .from('class_enrollments')
+        .insert({
           student_id: user.id,
           class_id: classId
-        }])
+        })
 
       if (error) throw error
 
-      // Actualizar estado local
-      setUserReservations(prev => {
-        const newReservations = [...prev, classId]
-        return newReservations
-      })
-      
-      // Recargar clases para actualizar contador de disponibilidad
+      setUserEnrollments(prev => [...prev, classId])
       await loadClasses()
       
-      alert('¡Reserva realizada con éxito!')
+      alert('¡Inscripción exitosa! Asistirás a esta clase todas las semanas.')
     } catch (error) {
-      console.error('Error making reservation:', error)
-      alert('Error al realizar la reserva: ' + (error as Error).message)
+      console.error('Error making enrollment:', error)
+      alert('Error al inscribirse: ' + (error as Error).message)
     } finally {
-      setReservationLoading(null)
+      setEnrollmentLoading(null)
     }
   }
 
-  const handleCancelReservation = async (classId: string) => {
+  const handleCancelEnrollment = async (classId: string) => { // CAMBIADO
     if (!user) {
       alert('Error: Usuario no autenticado')
       return
     }
 
-    setReservationLoading(classId)
+    setEnrollmentLoading(classId)
     
     try {
-      // Verificar que realmente tiene la reserva antes de cancelar
-      const { data: existingReservation, error: checkError } = await supabase
-        .from('reservations')
-        .select('id')
-        .eq('student_id', user.id)
-        .eq('class_id', classId)
-        .single()
-
-      if (checkError && !existingReservation) {
-        if (checkError.code === 'PGRST116') {
-          alert('No tienes una reserva para esta clase')
-          // Actualizar estado local por si estaba desincronizado
-          setUserReservations(prev => prev.filter(id => id !== classId))
-          return
-        }
-        throw checkError
-      }
-
-      // Proceder con la cancelación
       const { error } = await supabase
-        .from('reservations')
+        .from('class_enrollments') // CAMBIADO
         .delete()
         .eq('student_id', user.id)
         .eq('class_id', classId)
 
       if (error) throw error
 
-      // Actualizar estado local
-      setUserReservations(prev => {
-        const newReservations = prev.filter(id => id !== classId)
-        return newReservations
-      })
-      
-      // Recargar clases para actualizar contador
+      setUserEnrollments(prev => prev.filter(id => id !== classId))
       await loadClasses()
       
-      alert('Reserva cancelada con éxito')
+      alert('Te has dado de baja de la clase exitosamente')
     } catch (error) {
-      console.error('Error canceling reservation:', error)
-      alert('Error al cancelar la reserva: ' + (error as Error).message)
+      console.error('Error canceling enrollment:', error)
+      alert('Error al cancelar inscripción: ' + (error as Error).message)
     } finally {
-      setReservationLoading(null)
+      setEnrollmentLoading(null)
     }
   }
 
-  // Formatear hora para mostrar en formato legible
   const formatTime = (timeString: string) => {
     const [hours, minutes] = timeString.split(':')
     return `${hours}:${minutes}`
   }
 
-  // Filtrar clases según el filtro seleccionado
   const filteredClasses = classes.filter(classItem => {
-    if (filter === 'my-reservations') {
-      return userReservations.includes(classItem.id)
+    if (filter === 'my-classes') { // CAMBIADO
+      return userEnrollments.includes(classItem.id)
     }
     if (filter === 'available') {
       return classItem.available_spots > 0
     }
-    return true // 'all'
+    return true
   })
 
   if (loading) {
@@ -277,20 +267,16 @@ export default function ClassesPageContent() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* Header */}
       <div className="bg-white shadow-soft">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-neutral-900">Clases de Yoga</h1>
               <p className="text-sm text-neutral-600">
-                {filter === 'my-reservations' ? 'Mis reservas activas' : 'Explora y reserva clases'}
+                {filter === 'my-classes' ? 'Mis clases semanales' : 'Explora e inscríbete en clases'}
               </p>
             </div>
-            <Link
-              href="/dashboard"
-              className="btn-primary"
-            >
+            <Link href="/dashboard" className="btn-primary">
               Volver al Dashboard
             </Link>
           </div>
@@ -298,7 +284,6 @@ export default function ClassesPageContent() {
       </div>
 
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Filtros */}
         <div className="mb-6 flex flex-wrap gap-2">
           <button
             onClick={() => setFilter('all')}
@@ -324,34 +309,33 @@ export default function ClassesPageContent() {
           </button>
           {profile?.role === 'student' && (
             <button
-              onClick={() => setFilter('my-reservations')}
+              onClick={() => setFilter('my-classes')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-smooth border ${
-                filter === 'my-reservations'
+                filter === 'my-classes'
                   ? 'border-transparent text-white shadow-soft'
                   : 'bg-white text-neutral-700 border-neutral-400 hover:bg-neutral-50'
               }`}
-              style={filter === 'my-reservations' ? {backgroundColor: 'var(--primary-500)'} : {}}
+              style={filter === 'my-classes' ? {backgroundColor: 'var(--primary-500)'} : {}}
             >
-              Mis Reservas ({userReservations.length})
+              Mis Clases ({userEnrollments.length})
             </button>
           )}
         </div>
 
-        {/* Lista de clases */}
         {filteredClasses.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-neutral-500">
-              {filter === 'my-reservations' 
-                ? 'No tienes reservas activas' 
+              {filter === 'my-classes' 
+                ? 'No estás inscrito en ninguna clase' 
                 : 'No hay clases disponibles'}
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredClasses.map((classItem) => {
-              const isReserved = userReservations.includes(classItem.id)
+              const isEnrolled = userEnrollments.includes(classItem.id) // CAMBIADO
               const isFull = classItem.available_spots <= 0
-              const isLoading = reservationLoading === classItem.id
+              const isLoading = enrollmentLoading === classItem.id
 
               return (
                 <div key={classItem.id} className="class-card">
@@ -383,29 +367,28 @@ export default function ClassesPageContent() {
                         <span className="instructor-badge">{classItem.teacher?.full_name || 'No disponible'}</span>
                       </div>
                       <div className="flex items-center">
-                        <span className="font-medium w-20">Capacidad:</span>
+                        <span className="font-medium w-20">Inscritos:</span>
                         <span>{classItem.current_reservations}/{classItem.max_capacity}</span>
                       </div>
                     </div>
 
-                    {/* Botones de acción - solo para alumnos */}
                     {profile?.role === 'student' && (
                       <div className="mt-4">
-                        {isReserved ? (
+                        {isEnrolled ? (
                           <button
-                            onClick={() => handleCancelReservation(classItem.id)}
+                            onClick={() => handleCancelEnrollment(classItem.id)}
                             disabled={isLoading}
                             className="btn-danger w-full disabled:opacity-50"
                           >
-                            {isLoading ? 'Procesando...' : 'Cancelar Reserva'}
+                            {isLoading ? 'Procesando...' : 'Darme de Baja'}
                           </button>
                         ) : (
                           <button
-                            onClick={() => handleReservation(classItem.id)}
+                            onClick={() => handleEnrollment(classItem.id, classItem.teacher_id)}
                             disabled={isFull || isLoading}
                             className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            {isLoading ? 'Procesando...' : (isFull ? 'Sin Cupos' : 'Reservar')}
+                            {isLoading ? 'Procesando...' : (isFull ? 'Clase Llena' : 'Inscribirme')}
                           </button>
                         )}
                       </div>

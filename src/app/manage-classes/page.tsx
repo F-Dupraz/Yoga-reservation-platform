@@ -86,8 +86,10 @@ export default function ManageClassesPage() {
       }
 
       const classIds = classesData?.map(c => c.id) || [];
-      const { data: reservations, error: reservationsError } = await supabase
-        .from('reservations')
+      
+      // CAMBIADO: usar class_enrollments en lugar de reservations
+      const { data: enrollments, error: enrollmentsError } = await supabase
+        .from('class_enrollments') // CAMBIADO
         .select(`
           class_id,
           profiles:student_id (
@@ -96,16 +98,15 @@ export default function ManageClassesPage() {
         `)
         .in('class_id', classIds)
 
-      if(reservationsError) {
-        console.log('Error counting reservations for classes: ', reservationsError)
+      if(enrollmentsError) {
+        console.log('Error loading enrollments: ', enrollmentsError)
       }
 
-      // The .map was debbuged with Claude, I dont really know why I have that error, maybe is something with supabase
       const classesWithNames = classesData?.map(cla => ({
         ...cla,
-        namesReserved: reservations
-          ?.filter(r => r.class_id === cla.id)
-          ?.map(r => (r.profiles as unknown as { full_name: string }).full_name) || []
+        namesReserved: enrollments // Mantener el nombre para no romper la UI
+          ?.filter(e => e.class_id === cla.id)
+          ?.map(e => (e.profiles as unknown as { full_name: string }).full_name) || []
       }))
       
       setClasses(classesWithNames)

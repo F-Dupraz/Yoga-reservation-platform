@@ -132,13 +132,20 @@ export default function Dashboard() {
             <h3 className="text-lg font-medium text-neutral-900">Acciones Rápidas</h3>
           </div>
           <div className="card-body">
+
             {profile.role === 'teacher' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Link
                   href="/manage-classes"
                   className="btn-primary flex items-center justify-center"
                 >
                   Gestionar Mis Clases
+                </Link>
+                <Link
+                  href="/students-limits"
+                  className="btn-primary flex items-center justify-center"
+                >
+                  Gestionar Membresías
                 </Link>
                 <Link
                   href="/classes"
@@ -156,10 +163,10 @@ export default function Dashboard() {
                   Explorar Clases
                 </Link>
                 <Link
-                  href="/classes?filter=my-reservations"
+                  href="/classes?filter=my-classes"
                   className="btn-outline flex items-center justify-center"
                 >
-                  Mis Reservas
+                  Mis Clases Semanales
                 </Link>
               </div>
             )}
