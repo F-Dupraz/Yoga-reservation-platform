@@ -159,9 +159,9 @@ export default function StudentLimitsPage() {
     }
   }
 
-  if (loading) {
+if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
         <div className="spinner h-12 w-12"></div>
       </div>
     )
@@ -175,11 +175,14 @@ export default function StudentLimitsPage() {
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-neutral-900">Cupos Semanales</h1>
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-neutral-600 mt-1">
                 Gestiona cuántas clases puede tomar cada alumno por semana
               </p>
             </div>
-            <Link href="/dashboard" className="btn-secondary">
+            <Link 
+              href="/dashboard" 
+              className="btn-secondary"
+            >
               Volver
             </Link>
           </div>
@@ -187,54 +190,61 @@ export default function StudentLimitsPage() {
       </div>
 
       <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Formulario simple */}
+        {/* Formulario mejorado */}
         <div className="card mb-6">
           <div className="card-body">
-            <form onSubmit={handleSubmit} className="flex gap-4">
-              <input
-                type="text"
-                placeholder="Email o nombre del alumno"
-                value={formData.emailOrUsername}
-                onChange={(e) => setFormData({...formData, emailOrUsername: e.target.value})}
-                className="input-base flex-1"
-                required
-              />
-              <select
-                value={formData.weeklyLimit}
-                onChange={(e) => setFormData({...formData, weeklyLimit: e.target.value})}
-                className="form-select w-32"
-              >
-                <option value="0">Sin acceso</option>
-                <option value="1">1 clase</option>
-                <option value="2">2 clases</option>
-                <option value="3">3 clases</option>
-                <option value="4">4 clases</option>
-                <option value="5">5 clases</option>
-                <option value="6">6 clases</option>
-                <option value="7">7 clases</option>
-                <option value="10">10 clases</option>
-                <option value="15">15 clases</option>
-                <option value="20">20 clases</option>
-              </select>
-              <button
-                type="submit"
-                disabled={formLoading}
-                className="btn-primary"
-              >
-                {formLoading ? 'Procesando...' : (editingStudent ? 'Actualizar' : 'Asignar Cupos')}
-              </button>
-              {editingStudent && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingStudent(null)
-                    setFormData({ emailOrUsername: '', weeklyLimit: '2' })
-                  }}
-                  className="btn-outline"
-                >
-                  Cancelar
-                </button>
-              )}
+            <h2 className="text-lg font-semibold text-neutral-900 mb-4">
+              {editingStudent ? 'Editar Cupos' : 'Asignar Nuevos Cupos'}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Email o nombre del alumno"
+                    value={formData.emailOrUsername}
+                    onChange={(e) => setFormData({...formData, emailOrUsername: e.target.value})}
+                    className="input-base w-full"
+                    required
+                  />
+                </div>
+                
+                <div className="sm:w-32">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="Cupos"
+                    value={formData.weeklyLimit}
+                    onChange={(e) => setFormData({...formData, weeklyLimit: e.target.value})}
+                    className="input-base w-full"
+                    required
+                  />
+                </div>
+                
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={formLoading}
+                    className="btn-primary"
+                  >
+                    {formLoading ? 'Procesando...' : (editingStudent ? 'Actualizar' : 'Asignar Cupos')}
+                  </button>
+                  
+                  {editingStudent && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingStudent(null)
+                        setFormData({ emailOrUsername: '', weeklyLimit: '2' })
+                      }}
+                      className="btn-outline"
+                    >
+                      Cancelar
+                    </button>
+                  )}
+                </div>
+              </div>
             </form>
           </div>
         </div>
@@ -248,21 +258,26 @@ export default function StudentLimitsPage() {
           </div>
           
           {studentLimits.length === 0 ? (
-            <div className="card-body text-center text-neutral-500">
-              <p>No has asignado cupos a ningún alumno aún.</p>
-              <p className="text-sm mt-2">Usa el formulario de arriba para comenzar.</p>
+            <div className="card-body text-center">
+              <svg className="mx-auto h-12 w-12 text-neutral-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <p className="text-neutral-500 text-base">No has asignado cupos a ningún alumno aún.</p>
+              <p className="text-sm text-neutral-400 mt-2">Usa el formulario de arriba para comenzar.</p>
             </div>
           ) : (
             <div className="divide-y divide-neutral-200">
               {studentLimits.map((student) => (
-                <div key={student.id} className="p-4 flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="font-medium text-neutral-900">{student.full_name}</p>
-                    <p className="text-sm text-neutral-500">{student.email}</p>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
+                <div key={student.id} className="p-4 hover:bg-neutral-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-base font-medium text-neutral-900 truncate">
+                        {student.full_name}
+                      </p>
+                      <p className="text-sm text-neutral-500 truncate">{student.email}</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 ml-4">
                       <div className="flex items-center gap-2">
                         <span className="badge-primary">
                           {student.current_enrollments}/{student.weekly_class_limit} clases
@@ -273,21 +288,21 @@ export default function StudentLimitsPage() {
                           </span>
                         )}
                       </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(student)}
-                        className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(student.student_id)}
-                        className="text-red-600 hover:text-red-700 text-sm font-medium"
-                      >
-                        Eliminar
-                      </button>
+                      
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleEdit(student)}
+                          className="text-primary-600 hover:text-primary-700 text-sm font-medium transition-colors"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(student.student_id)}
+                          className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
