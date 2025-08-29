@@ -277,7 +277,7 @@ export default function ClassesPageContent() {
               </p>
             </div>
             <Link href="/dashboard" className="btn-primary">
-              Volver al Dashboard
+              Volver
             </Link>
           </div>
         </div>

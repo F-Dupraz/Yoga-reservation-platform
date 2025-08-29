@@ -155,7 +155,7 @@ export default function Dashboard() {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Link
                   href="/classes"
                   className="btn-primary flex items-center justify-center"
@@ -164,9 +164,15 @@ export default function Dashboard() {
                 </Link>
                 <Link
                   href="/classes?filter=my-classes"
-                  className="btn-outline flex items-center justify-center"
+                  className="btn-primary flex items-center justify-center"
                 >
                   Mis Clases Semanales
+                </Link>
+                <Link
+                  href="/search-teachers"
+                  className="btn-outline flex items-center justify-center"
+                >
+                  Explorar Profesores
                 </Link>
               </div>
             )}

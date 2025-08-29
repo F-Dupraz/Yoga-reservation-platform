@@ -266,7 +266,7 @@ export default function ManageClassesPage() {
                 href="/dashboard"
                 className="btn-secondary"
               >
-                Volver al Dashboard
+                Volver
               </Link>
             </div>
           </div>

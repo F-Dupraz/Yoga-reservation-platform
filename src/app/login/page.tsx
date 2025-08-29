@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { signIn, signUpWithRole } from '@/lib/supabase'
 
 export default function LoginPage() {
@@ -8,6 +9,7 @@ export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    phone: '',
     fullName: '',
     role: 'student'
   })
@@ -28,12 +30,13 @@ export default function LoginPage() {
         await signIn(formData.email, formData.password)
       } else {
         // Proceso de registro - crea nuevo usuario con rol específico
-        await signUpWithRole(
-          formData.email, 
-          formData.password, 
-          formData.role, 
-          formData.fullName
-        )
+        await signUpWithRole({
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+          role: formData.role,
+          fullName: formData.fullName
+        })
       }
       
       // Redirigir al dashboard después de autenticación exitosa
@@ -127,22 +130,41 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Selector de rol - solo en registro */}
+            {/* Selector de rol y numero - solo en registro */}
             {!isLogin && (
               <div>
-                <label htmlFor="role" className="form-label">
-                  Tipo de Usuario
-                </label>
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="form-select"
-                >
-                  <option value="student">Alumno - Reservar clases</option>
-                  <option value="teacher">Profesor - Crear y gestionar clases</option>
-                </select>
+                
+                <div>
+                  <label htmlFor="phone" className="form-label">
+                    Numero de telefono
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="phone"
+                    className="input-base form-input"
+                    placeholder="Numero de telefono"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              
+                <div>
+                  <label htmlFor="role" className="form-label">
+                    Tipo de Usuario
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleInputChange}
+                    className="form-select"
+                  >
+                    <option value="student">Alumno - Reservar clases</option>
+                    <option value="teacher">Profesor - Crear y gestionar clases</option>
+                  </select>
+                </div>
+
               </div>
             )}
           </div>
@@ -174,6 +196,15 @@ export default function LoginPage() {
             >
               {loading ? 'Procesando...' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
             </button>
+          
+            <div className="mt-4 text-center">
+              <Link 
+                href="/forgot-password" 
+                className="text-sm text-neutral-600 hover:text-neutral-900 underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </div>
         </form>
       </div>
